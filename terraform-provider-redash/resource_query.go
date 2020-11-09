@@ -13,6 +13,7 @@
 package main
 
 import (
+	"encoding/json"
 	"context"
 	"fmt"
 	"strconv"
@@ -20,6 +21,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/snowplow-devops/redash-client-go/redash"
+	//"log"
+	//"github.com/davecgh/go-spew/spew"
 )
 
 func resourceRedashQuery() *schema.Resource {
@@ -44,6 +47,43 @@ func resourceRedashQuery() *schema.Resource {
 				Type:     schema.TypeString,
 				Required: true,
 			},
+			"options": {
+				Type: schema.TypeString,
+				Optional: true,
+			},
+			// "options": {
+			// 	Type: schema.TypeList,
+			// 	Optional: true,
+			// 	MaxItems: 1,
+			// 	Elem: &schema.Resource{
+			// 		Schema: map[string]*schema.Schema{
+			// 			"parameters": {
+			// 				Type: schema.TypeList,
+			// 				Optional: true,
+			// 				Elem: &schema.Resource{
+			// 					Schema: map[string]*schema.Schema{
+			// 						"name": {
+			// 							Type: schema.TypeString,
+			// 							Required: true,
+			// 						},
+			// 						"type": {
+			// 							Type: schema.TypeString,
+			// 							Required: true,
+			// 						},
+			// 						"enumOptions": {
+			// 							Type: schema.TypeString,
+			// 							Optional: true,
+			// 						},
+			// 						"value": {
+			// 							Type: schema.TypeString,
+			// 							Optional: true,
+			// 						},
+			// 					},
+			// 				},
+			// 			},
+			// 		},
+			// 	},
+			// },	
 			// "tags": {
 			// 	Type:     schema.TypeList,
 			// 	Optional: true,
@@ -58,20 +98,6 @@ func resourceRedashQuery() *schema.Resource {
 			// 		return nil, nil
 			// 	},
 			// }, 
-			// "options": {
-			// 	Type: schema.TypeMap,
-			// 	Optional: true,
-			// 	Elem: &schema.Resource{
-			// 		Schema: map[string]*schema.Schema{
-			// 			"parameters": {
-			// 				Type: schema.TypeList,
-			// 				Optional: true,
-			// 				Elem: &schema.Schema{
-			// 					Type: schema.TypeString,
-			// 				},
-			// 			},	
-			// 		},
-			// 	},		
 			// },
 		},
 	}
@@ -87,6 +113,9 @@ func resourceRedashQueryCreate(ctx context.Context, d *schema.ResourceData, meta
 		DataSourceID:       d.Get("data_source_id").(int),
 		Query:              d.Get("query").(string),
 	}
+
+	options := []byte(d.Get("options").(string))
+	json.Unmarshal(options, &payload.Options)
 
 	query, err := c.CreateQuery(&payload)
 	if err != nil {
@@ -138,6 +167,8 @@ func resourceRedashQueryUpdate(ctx context.Context, d *schema.ResourceData, meta
 		DataSourceID:       d.Get("data_source_id").(int),
 		Query:              d.Get("query").(string),
 	}
+	options := []byte(d.Get("options").(string))
+	json.Unmarshal(options, &payload.Options)
 
 	_, err = c.UpdateQuery(id, &payload)
 	if err != nil {

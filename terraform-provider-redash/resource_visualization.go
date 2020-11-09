@@ -75,6 +75,7 @@ func resourceRedashVisualizationCreate(ctx context.Context, d *schema.ResourceDa
 	}
 
 	d.SetId(fmt.Sprint(visualization.ID))
+	
 	resourceRedashVisualizationRead(ctx, d, meta)
 
 	return diags
@@ -118,7 +119,7 @@ func resourceRedashVisualizationUpdate(ctx context.Context, d *schema.ResourceDa
 	}
 	options := []byte(d.Get("options").(string))
 	json.Unmarshal(options, &payload.Options)
-	
+
 	_, err = c.UpdateVisualization(id, &payload)
 	if err != nil {
 		return diag.FromErr(err)
